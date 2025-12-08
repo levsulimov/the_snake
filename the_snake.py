@@ -1,6 +1,8 @@
-import pygame
 import random
-from typing import List, Tuple, Optional
+from typing import Optional, Tuple
+
+import pygame
+
 
 # Константы игры
 SCREEN_WIDTH = 640
@@ -26,7 +28,7 @@ class GameObject:
         body_color (Tuple[int, int, int]): Цвет объекта в формате RGB.
     """
     
-    def __init__(self, position: Optional[Tuple[int, int]] = None, 
+    def __init__(self, position: Optional[Tuple[int, int]] = None,
                  body_color: Optional[Tuple[int, int, int]] = None) -> None:
         """
         Инициализирует игровой объект.
@@ -92,9 +94,9 @@ class Snake(GameObject):
     
     Атрибуты:
         length (int): Текущая длина змейки.
-        positions (List[Tuple[int, int]]): Список позиций сегментов змейки.
+        positions (list[Tuple[int, int]]): Список позиций сегментов змейки.
         direction (Tuple[int, int]): Текущее направление движения.
-        next_direction (Optional[Tuple[int, int]]): Следующее направление движения.
+        next_direction (Optional[Tuple[int, int]]): Следующее направление.
         last (Optional[Tuple[int, int]]): Позиция последнего удалённого сегмента.
     """
     
@@ -197,25 +199,27 @@ class Snake(GameObject):
             # Отрисовываем глаза на голове
             if i == 0:
                 eye_size = GRID_SIZE // 5
-                # Левый глаз
+                # Определяем позиции глаз в зависимости от направления
                 if self.direction == RIGHT:
-                    left_eye = (pos[0] + GRID_SIZE - eye_size * 2, pos[1] + eye_size * 2)
+                    left_eye = (pos[0] + GRID_SIZE - eye_size * 2,
+                                pos[1] + eye_size * 2)
+                    right_eye = (pos[0] + GRID_SIZE - eye_size * 2,
+                                 pos[1] + GRID_SIZE - eye_size * 2)
                 elif self.direction == LEFT:
-                    left_eye = (pos[0] + eye_size, pos[1] + eye_size * 2)
+                    left_eye = (pos[0] + eye_size,
+                                pos[1] + eye_size * 2)
+                    right_eye = (pos[0] + eye_size,
+                                 pos[1] + GRID_SIZE - eye_size * 2)
                 elif self.direction == UP:
-                    left_eye = (pos[0] + eye_size * 2, pos[1] + eye_size)
+                    left_eye = (pos[0] + eye_size * 2,
+                                pos[1] + eye_size)
+                    right_eye = (pos[0] + GRID_SIZE - eye_size * 2,
+                                 pos[1] + eye_size)
                 else:  # DOWN
-                    left_eye = (pos[0] + eye_size * 2, pos[1] + GRID_SIZE - eye_size * 2)
-                
-                # Правый глаз
-                if self.direction == RIGHT:
-                    right_eye = (pos[0] + GRID_SIZE - eye_size * 2, pos[1] + GRID_SIZE - eye_size * 2)
-                elif self.direction == LEFT:
-                    right_eye = (pos[0] + eye_size, pos[1] + GRID_SIZE - eye_size * 2)
-                elif self.direction == UP:
-                    right_eye = (pos[0] + GRID_SIZE - eye_size * 2, pos[1] + eye_size)
-                else:  # DOWN
-                    right_eye = (pos[0] + GRID_SIZE - eye_size * 2, pos[1] + GRID_SIZE - eye_size * 2)
+                    left_eye = (pos[0] + eye_size * 2,
+                                pos[1] + GRID_SIZE - eye_size * 2)
+                    right_eye = (pos[0] + GRID_SIZE - eye_size * 2,
+                                 pos[1] + GRID_SIZE - eye_size * 2)
                 
                 pygame.draw.circle(surface, (0, 0, 0), left_eye, eye_size)
                 pygame.draw.circle(surface, (0, 0, 0), right_eye, eye_size)
