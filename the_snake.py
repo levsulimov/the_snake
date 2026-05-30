@@ -1,5 +1,5 @@
-import pygame
 import random
+import pygame
 from typing import List, Optional, Set, Tuple
 
 GRID_SIZE = 20
@@ -22,21 +22,35 @@ GAME_SPEED = 20
 
 
 class GameObject:
-    def __init__(self, position: Tuple[int, int] = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)):
+    """Base class for all game objects."""
+
+    def __init__(
+        self,
+        position: Tuple[int, int] = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+    ):
+        """Initialize game object."""
         self.position = position
         self.body_color = None
 
     def draw(self, surface: pygame.Surface) -> None:
+        """Draw object on surface."""
         pass
 
 
 class Apple(GameObject):
+    """Apple class that snake eats."""
+
     def __init__(self, occupied_cells: Optional[Set[Tuple[int, int]]] = None):
+        """Initialize apple."""
         super().__init__()
         self.body_color = APPLE_COLOR
         self.randomize_position(occupied_cells)
 
-    def randomize_position(self, occupied_cells: Optional[Set[Tuple[int, int]]] = None) -> None:
+    def randomize_position(
+        self,
+        occupied_cells: Optional[Set[Tuple[int, int]]] = None
+    ) -> None:
+        """Set random position for apple."""
         if occupied_cells is None:
             occupied_cells = set()
 
@@ -54,13 +68,17 @@ class Apple(GameObject):
                 break
 
     def draw(self, surface: pygame.Surface) -> None:
+        """Draw apple on surface."""
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(surface, self.body_color, rect)
         pygame.draw.rect(surface, BOARD_BACKGROUND_COLOR, rect, 1)
 
 
 class Snake(GameObject):
+    """Snake class controlled by player."""
+
     def __init__(self):
+        """Initialize snake."""
         super().__init__()
         self.length = 1
         self.positions: List[Tuple[int, int]] = [self.position]
@@ -70,13 +88,15 @@ class Snake(GameObject):
         self.last: Optional[Tuple[int, int]] = None
 
     def update_direction(self) -> None:
+        """Update snake direction."""
         if self.next_direction:
-            opposite_directions = {UP: DOWN, DOWN: UP, LEFT: RIGHT, RIGHT: LEFT}
-            if opposite_directions.get(self.next_direction) != self.direction:
+            opposite = {UP: DOWN, DOWN: UP, LEFT: RIGHT, RIGHT: LEFT}
+            if opposite.get(self.next_direction) != self.direction:
                 self.direction = self.next_direction
             self.next_direction = None
 
     def move(self) -> None:
+        """Move snake one step."""
         head_x, head_y = self.get_head_position()
         dx, dy = self.direction
 
@@ -96,29 +116,27 @@ class Snake(GameObject):
         if len(self.positions) > self.length:
             self.positions.pop()
 
-        condition = (
-            len(self.positions) <= self.length
-            and self.last == self.positions[-1]
-            if self.positions
-            else False
-        )
-        if condition:
-            self.last = None
+        if self.positions and len(self.positions) <= self.length:
+            if self.last == self.positions[-1]:
+                self.last = None
 
     def draw(self, surface: pygame.Surface) -> None:
+        """Draw snake on surface."""
         if self.last:
             last_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
             pygame.draw.rect(surface, BOARD_BACKGROUND_COLOR, last_rect)
 
-        for position in self.positions:
-            rect = pygame.Rect(position, (GRID_SIZE, GRID_SIZE))
+        for pos in self.positions:
+            rect = pygame.Rect(pos, (GRID_SIZE, GRID_SIZE))
             pygame.draw.rect(surface, self.body_color, rect)
             pygame.draw.rect(surface, BOARD_BACKGROUND_COLOR, rect, 1)
 
     def get_head_position(self) -> Tuple[int, int]:
+        """Return head position."""
         return self.positions[0] if self.positions else self.position
 
     def reset(self) -> None:
+        """Reset snake to initial state."""
         self.length = 1
         self.positions = [self.position]
         self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
@@ -127,6 +145,7 @@ class Snake(GameObject):
 
 
 def handle_keys(snake: Snake) -> None:
+    """Handle keyboard input."""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -146,6 +165,7 @@ def handle_keys(snake: Snake) -> None:
 
 
 def main() -> None:
+    """Main game loop."""
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption('Изгиб Питона')
