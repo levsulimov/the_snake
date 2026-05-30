@@ -1,4 +1,5 @@
 import random
+
 import pygame
 from typing import List, Optional, Set, Tuple
 
