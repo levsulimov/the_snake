@@ -5,7 +5,6 @@ from typing import List, Optional, Set, Tuple
 
 import pygame
 
-
 GRID_SIZE = 20
 GRID_WIDTH = 32
 GRID_HEIGHT = 24
@@ -47,6 +46,11 @@ class GameObject:
         """Отрисовать объект."""
         pass
 
+    def draw_cell(self, surface: pygame.Surface, position: Tuple[int, int]) -> None:
+        """Нарисовать одну ячейку на игровом поле."""
+        rect = pygame.Rect(position, (GRID_SIZE, GRID_SIZE))
+        pygame.draw.rect(surface, self.body_color, rect)
+
 
 class Apple(GameObject):
     """Класс яблока."""
@@ -68,16 +72,13 @@ class Apple(GameObject):
         if occupied_cells is None:
             occupied_cells = set()
 
+        if len(occupied_cells) >= GRID_WIDTH * GRID_HEIGHT:
+            return
+
         while True:
             new_position = (
-                random.randint(
-                    0,
-                    GRID_WIDTH - 1,
-                ) * GRID_SIZE,
-                random.randint(
-                    0,
-                    GRID_HEIGHT - 1,
-                ) * GRID_SIZE,
+                random.randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+                random.randint(0, GRID_HEIGHT - 1) * GRID_SIZE,
             )
 
             if new_position not in occupied_cells:
@@ -86,16 +87,7 @@ class Apple(GameObject):
 
     def draw(self, surface: pygame.Surface) -> None:
         """Отрисовать яблоко."""
-        rect = pygame.Rect(
-            self.position,
-            (GRID_SIZE, GRID_SIZE),
-        )
-
-        pygame.draw.rect(
-            surface,
-            self.body_color,
-            rect,
-        )
+        self.draw_cell(surface, self.position)
 
 
 class Snake(GameObject):
@@ -106,178 +98,80 @@ class Snake(GameObject):
         super().__init__()
 
         self.length = 1
-        self.positions: List[Tuple[int, int]] = [
-            self.position
-        ]
+        self.positions: List[Tuple[int, int]] = [self.position]
         self.direction = START_DIRECTION
         self.next_direction = None
         self.body_color = SNAKE_COLOR
-        self.last: Optional[
-            Tuple[int, int]
-        ] = None
+        self.last: Optional[Tuple[int, int]] = None
 
-    def get_head_position(
-        self,
-    ) -> Tuple[int, int]:
+    def get_head_position(self) -> Tuple[int, int]:
         """Вернуть координаты головы."""
         return self.positions[0]
 
     def update_direction(self) -> None:
         """Обновить направление движения."""
         if self.next_direction:
-            opposite = {
-                UP: DOWN,
-                DOWN: UP,
-                LEFT: RIGHT,
-                RIGHT: LEFT,
-            }
+            opposite = {UP: DOWN, DOWN: UP, LEFT: RIGHT, RIGHT: LEFT}
 
-            if (
-                opposite.get(
-                    self.next_direction
-                )
-                != self.direction
-            ):
-                self.direction = (
-                    self.next_direction
-                )
+            if opposite.get(self.next_direction) != self.direction:
+                self.direction = self.next_direction
 
         self.next_direction = None
 
     def move(self) -> None:
         """Переместить змейку."""
-        head_x, head_y = (
-            self.get_head_position()
-        )
-
+        head_x, head_y = self.get_head_position()
         dx, dy = self.direction
 
         new_head = (
-            (
-                head_x
-                + dx * GRID_SIZE
-            )
-            % SCREEN_WIDTH,
-            (
-                head_y
-                + dy * GRID_SIZE
-            )
-            % SCREEN_HEIGHT,
+            (head_x + dx * GRID_SIZE) % SCREEN_WIDTH,
+            (head_y + dy * GRID_SIZE) % SCREEN_HEIGHT,
         )
 
-        if (
-            self.length > 1
-            and new_head
-            in self.positions[:-1]
-        ):
+        if self.length > 1 and new_head in self.positions[:-1]:
             self.reset()
             return
 
-        self.positions.insert(
-            0,
-            new_head,
-        )
+        self.positions.insert(0, new_head)
 
-        if (
-            len(self.positions)
-            > self.length
-        ):
-            self.last = (
-                self.positions.pop()
-            )
+        if len(self.positions) > self.length:
+            self.last = self.positions.pop()
 
-    def draw(
-        self,
-        surface: pygame.Surface,
-    ) -> None:
+    def draw(self, surface: pygame.Surface) -> None:
         """Отрисовать змейку."""
         if self.last:
-            tail_rect = pygame.Rect(
-                self.last,
-                (
-                    GRID_SIZE,
-                    GRID_SIZE,
-                ),
-            )
-
-            pygame.draw.rect(
-                surface,
-                BOARD_BACKGROUND_COLOR,
-                tail_rect,
-            )
+            tail_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
+            pygame.draw.rect(surface, BOARD_BACKGROUND_COLOR, tail_rect)
 
         for position in self.positions:
-            rect = pygame.Rect(
-                position,
-                (
-                    GRID_SIZE,
-                    GRID_SIZE,
-                ),
-            )
-
-            pygame.draw.rect(
-                surface,
-                self.body_color,
-                rect,
-            )
+            self.draw_cell(surface, position)
 
     def reset(self) -> None:
         """Сбросить змейку."""
         self.length = 1
-        self.positions = [
-            CENTER_POSITION
-        ]
-        self.direction = (
-            random.choice(
-                [
-                    UP,
-                    DOWN,
-                    LEFT,
-                    RIGHT,
-                ]
-            )
-        )
+        self.positions = [CENTER_POSITION]
+        self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
         self.next_direction = None
         self.last = None
 
 
-def handle_keys(
-    snake: Snake,
-) -> None:
+def handle_keys(snake: Snake) -> None:
     """Обработать нажатия клавиш."""
     for event in pygame.event.get():
-
         if event.type == pygame.QUIT:
             pygame.quit()
             raise SystemExit
 
         if event.type == pygame.KEYDOWN:
-
             if event.key == pygame.K_UP:
                 snake.next_direction = UP
-
-            elif (
-                event.key
-                == pygame.K_DOWN
-            ):
+            elif event.key == pygame.K_DOWN:
                 snake.next_direction = DOWN
-
-            elif (
-                event.key
-                == pygame.K_LEFT
-            ):
+            elif event.key == pygame.K_LEFT:
                 snake.next_direction = LEFT
-
-            elif (
-                event.key
-                == pygame.K_RIGHT
-            ):
+            elif event.key == pygame.K_RIGHT:
                 snake.next_direction = RIGHT
-
-            elif (
-                event.key
-                == pygame.K_ESCAPE
-            ):
+            elif event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 raise SystemExit
 
@@ -286,50 +180,27 @@ def main() -> None:
     """Запустить игру."""
     pygame.init()
 
-    screen = pygame.display.set_mode(
-        (
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
-        )
-    )
-
-    pygame.display.set_caption(
-        'Изгиб Питона'
-    )
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption('Изгиб Питона')
 
     clock = pygame.time.Clock()
 
     snake = Snake()
-    apple = Apple(
-        set(snake.positions)
-    )
+    apple = Apple(set(snake.positions))
 
     while True:
         handle_keys(snake)
-
         snake.update_direction()
-
         snake.move()
 
-        if (
-            snake.get_head_position()
-            == apple.position
-        ):
+        if snake.get_head_position() == apple.position:
             snake.length += 1
+            apple.randomize_position(set(snake.positions))
 
-            apple.randomize_position(
-                set(snake.positions)
-            )
-
-        screen.fill(
-            BOARD_BACKGROUND_COLOR
-        )
-
+        screen.fill(BOARD_BACKGROUND_COLOR)
         apple.draw(screen)
         snake.draw(screen)
-
         pygame.display.update()
-
         clock.tick(GAME_SPEED)
 
 
