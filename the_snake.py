@@ -1,6 +1,6 @@
 import pygame
 import random
-from typing import List, Tuple, Optional, Set
+from typing import List, Optional, Set, Tuple
 
 GRID_SIZE = 20
 GRID_WIDTH = 32
@@ -71,12 +71,7 @@ class Snake(GameObject):
 
     def update_direction(self) -> None:
         if self.next_direction:
-            opposite_directions = {
-                UP: DOWN,
-                DOWN: UP,
-                LEFT: RIGHT,
-                RIGHT: LEFT
-            }
+            opposite_directions = {UP: DOWN, DOWN: UP, LEFT: RIGHT, RIGHT: LEFT}
             if opposite_directions.get(self.next_direction) != self.direction:
                 self.direction = self.next_direction
             self.next_direction = None
@@ -101,7 +96,13 @@ class Snake(GameObject):
         if len(self.positions) > self.length:
             self.positions.pop()
 
-        if len(self.positions) <= self.length and self.last == self.positions[-1] if self.positions else False:
+        condition = (
+            len(self.positions) <= self.length
+            and self.last == self.positions[-1]
+            if self.positions
+            else False
+        )
+        if condition:
             self.last = None
 
     def draw(self, surface: pygame.Surface) -> None:
@@ -147,7 +148,7 @@ def handle_keys(snake: Snake) -> None:
 def main() -> None:
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Изгиб Питона")
+    pygame.display.set_caption('Изгиб Питона')
     clock = pygame.time.Clock()
 
     snake = Snake()
@@ -169,5 +170,5 @@ def main() -> None:
         clock.tick(GAME_SPEED)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
