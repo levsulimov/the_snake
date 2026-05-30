@@ -30,6 +30,11 @@ CENTER_POSITION = (
     SCREEN_HEIGHT // 2,
 )
 
+pygame.init()
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption('Изгиб Питона')
+clock = pygame.time.Clock()
+
 
 class GameObject:
     """Базовый класс игровых объектов."""
@@ -182,13 +187,6 @@ def handle_keys(snake: Snake) -> None:
 
 def main() -> None:
     """Запустить игру."""
-    pygame.init()
-
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption('Изгиб Питона')
-
-    clock = pygame.time.Clock()
-
     snake = Snake()
     apple = Apple(set(snake.positions))
 
