@@ -46,7 +46,11 @@ class GameObject:
         """Отрисовать объект."""
         pass
 
-    def draw_cell(self, surface: pygame.Surface, position: Tuple[int, int]) -> None:
+    def draw_cell(
+        self,
+        surface: pygame.Surface,
+        position: Tuple[int, int]
+    ) -> None:
         """Нарисовать одну ячейку на игровом поле."""
         rect = pygame.Rect(position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(surface, self.body_color, rect)
