@@ -1,0 +1,5 @@
+[
+  {"name":"Деканат", "phone":"+7 (000) 000-00-00", "email":"dean@example.edu", "address":"Главный корпус, кабинет 101"},
+  {"name":"Приёмная комиссия", "phone":"+7 (000) 000-00-01", "email":"admission@example.edu", "address":"Главный корпус, кабинет 102"},
+  {"name":"Администрация общежития", "phone":"+7 (000) 000-00-02", "email":"dorm@example.edu", "address":"Общежитие № 1"}
+]
